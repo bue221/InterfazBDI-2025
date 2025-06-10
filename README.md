@@ -47,6 +47,45 @@ source ~/.bashrc
 └── InterfazBDI-2025.pdf # Documentación del proyecto
 ```
 
+## Instalación y Configuración Rápida
+
+### 1. Virtualizar Oracle Database con Docker (Recomendado)
+
+Si no tienes Oracle instalado, puedes levantarlo rápidamente con Docker:
+
+```bash
+docker run -d -it --name oracle-db -p 1521:1521 -e ORACLE_PWD=MiClave123 gvenzl/oracle-free
+```
+
+- Espera unos minutos a que la base de datos termine de inicializarse.
+- El usuario por defecto es `SYS` y la contraseña es la que pusiste en `ORACLE_PWD`.
+- El nombre del servicio suele ser `ORCLPDB1` (puedes verificarlo en los logs del contenedor).
+
+### 2. Configurar el Backend
+
+En la carpeta `backend`, abre el archivo `index.js` y edita las siguientes líneas según tu configuración de Oracle:
+
+```js
+const dbConfig = {
+  user: 'SYS',
+  password: 'MiClave123',
+  connectString: 'localhost:1521/ORCLPDB1', // Cambia el nombre del servicio si es necesario
+  privilege: oracledb.SYSDBA
+};
+```
+
+Asegúrate de que los datos coincidan con los de tu contenedor Docker o tu instancia local.
+
+### 3. Inicializar la Base de Datos
+
+Una vez que el backend esté corriendo (`pnpm start`), abre tu navegador y visita:
+
+```
+http://localhost:3001/setup
+```
+
+Esto ejecutará el script de inicialización y dejará la base de datos lista para usar con la aplicación.
+
 ## Instalación
 
 ### 1. Clonar el repositorio
