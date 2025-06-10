@@ -28,11 +28,38 @@ app.get('/usuarios', async (req, res) => {
     }
 });
 
+app.get('/ubicaciones', async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`
+            SELECT codUbica, nomUbica, tipoUbica 
+            FROM Ubicacion 
+            ORDER BY nomUbica
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    } finally {
+        if (connection) await connection.close();
+    }
+});
+
 app.post('/usuarios', async (req, res) => {
     const { consecUser, nombre, apellido, usuario, fechaRegistro, email, celular, codUbica } = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection(dbConfig);
+
+        // Verificar si la ubicación existe
+        const checkUbicacion = await connection.execute(
+            'SELECT COUNT(*) as count FROM Ubicacion WHERE codUbica = :1',
+            [codUbica]
+        );
+
+        if (checkUbicacion.rows[0][0] === 0) {
+            return res.status(400).json({ error: 'El código de ubicación no existe' });
+        }
 
         // Check if email already exists
         const checkEmail = await connection.execute(
@@ -45,9 +72,10 @@ app.post('/usuarios', async (req, res) => {
         }
 
         await connection.execute(`
-      INSERT INTO Usuario (consecUser, nombre, apellido, usuario, fechaRegistro, email, celular, codUbica)
-      VALUES (:1, :2, :3, :4, TO_DATE(:5, 'YYYY-MM-DD'), :6, :7, :8)
-    `, [consecUser, nombre, apellido, usuario, fechaRegistro, email, celular, codUbica], { autoCommit: true });
+            INSERT INTO Usuario (consecUser, nombre, apellido, usuario, fechaRegistro, email, celular, codUbica)
+            VALUES (:1, :2, :3, :4, TO_DATE(:5, 'YYYY-MM-DD'), :6, :7, :8)
+        `, [consecUser, nombre, apellido, usuario, fechaRegistro, email, celular, codUbica], { autoCommit: true });
+
         res.json({ message: 'Usuario registrado' });
     } catch (err) {
         res.status(500).json({ error: err.message });
