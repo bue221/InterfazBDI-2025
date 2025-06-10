@@ -1,21 +1,50 @@
 # InterfazBDI-2025
 
-Este proyecto consiste en una interfaz web para interactuar con una base de datos Oracle, desarrollada con React + TypeScript en el frontend y Node.js en el backend.
+Este proyecto consiste en una interfaz web para interactuar con una base de datos Oracle, desarrollada con Streamlit en el frontend y Node.js en el backend.
 
 ## Requisitos Previos
 
+### Sistema Operativo
+- macOS (recomendado) o Linux
 - Node.js (versión 18 o superior)
 - pnpm (versión 10.11.0 o superior)
-- Oracle Database
+- Python 3.8 o superior
+- Oracle Database 19c o superior
 - Oracle Instant Client
+
+### Instalación de Oracle Instant Client
+
+#### macOS (usando Homebrew)
+```bash
+brew install instantclient-basic
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Descargar Oracle Instant Client
+wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
+
+# Instalar dependencias
+sudo apt-get install libaio1
+
+# Descomprimir y configurar
+unzip instantclient-basic-linuxx64.zip
+sudo mv instantclient_* /opt/oracle/instantclient
+sudo ln -s /opt/oracle/instantclient/libclntsh.so.* /opt/oracle/instantclient/libclntsh.so
+
+# Configurar variables de entorno
+echo 'export LD_LIBRARY_PATH=/opt/oracle/instantclient:$LD_LIBRARY_PATH' >> ~/.bashrc
+echo 'export PATH=/opt/oracle/instantclient:$PATH' >> ~/.bashrc
+source ~/.bashrc
+```
 
 ## Estructura del Proyecto
 
 ```
 .
-├── frontend/          # Aplicación React + TypeScript
-├── backend/           # Servidor Node.js
-└── InterfazBDI-2025.pdf  # Documentación del proyecto
+├── streamlit-frontend/  # Aplicación Streamlit
+├── backend/            # Servidor Node.js
+└── InterfazBDI-2025.pdf # Documentación del proyecto
 ```
 
 ## Instalación
@@ -40,13 +69,21 @@ Configura las variables de entorno necesarias para la conexión a Oracle:
   ORACLE_USER=tu_usuario
   ORACLE_PASSWORD=tu_contraseña
   ORACLE_CONNECTION_STRING=tu_connection_string
+  PORT=3000
   ```
 
-### 3. Configurar el Frontend
+Para obtener el connection string de Oracle:
+1. Abre SQL*Plus o SQL Developer
+2. Ejecuta: `SELECT sys_context('userenv', 'db_name') FROM dual;`
+3. El formato del connection string será: `localhost:1521/XE` (para Express Edition) o `hostname:puerto/service_name`
+
+### 3. Configurar el Frontend (Streamlit)
 
 ```bash
-cd frontend
-pnpm install
+cd streamlit-frontend
+python -m venv venv
+source venv/bin/activate  # En Windows: .\venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ## Ejecución
@@ -60,35 +97,33 @@ pnpm start
 
 El servidor backend se ejecutará en `http://localhost:3000`
 
-### Frontend
+### Frontend (Streamlit)
 
 ```bash
-cd frontend
-pnpm dev
+cd streamlit-frontend
+streamlit run app.py
 ```
 
-La aplicación frontend estará disponible en `http://localhost:5173`
+La aplicación frontend estará disponible en `http://localhost:8501`
 
 ## Scripts Disponibles
 
 ### Backend
 - `pnpm start`: Inicia el servidor backend
+- `pnpm dev`: Inicia el servidor en modo desarrollo con hot-reload
+- `pnpm test`: Ejecuta las pruebas unitarias
 
-### Frontend
-- `pnpm dev`: Inicia el servidor de desarrollo
-- `pnpm build`: Construye la aplicación para producción
-- `pnpm preview`: Previsualiza la versión de producción
-- `pnpm lint`: Ejecuta el linter
+### Frontend (Streamlit)
+- `streamlit run app.py`: Inicia la aplicación Streamlit
+- `streamlit run app.py --server.port 8502`: Inicia en un puerto específico
 
 ## Tecnologías Utilizadas
 
 ### Frontend
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui
-- Axios
+- Streamlit
+- Python
+- Pandas
+- Plotly
 
 ### Backend
 - Node.js
@@ -99,10 +134,23 @@ La aplicación frontend estará disponible en `http://localhost:5173`
 ## Desarrollo
 
 1. Asegúrate de tener todas las dependencias instaladas
-2. Inicia el servidor backend
-3. En otra terminal, inicia el servidor frontend
-4. Realiza tus cambios
-5. Los cambios en el frontend se reflejarán automáticamente gracias al hot-reload
+2. Verifica que Oracle Instant Client esté correctamente configurado
+3. Inicia el servidor backend
+4. En otra terminal, inicia el servidor frontend de Streamlit
+5. Los cambios en el frontend se reflejarán automáticamente
+
+## Solución de Problemas Comunes
+
+### Error de conexión a Oracle
+1. Verifica que Oracle Instant Client esté instalado correctamente
+2. Confirma que las variables de entorno estén configuradas
+3. Verifica que el servicio de Oracle esté corriendo
+4. Comprueba que el connection string sea correcto
+
+### Error en Streamlit
+1. Asegúrate de estar en el entorno virtual correcto
+2. Verifica que todas las dependencias estén instaladas
+3. Comprueba que el puerto 8501 esté disponible
 
 ## Contribución
 
