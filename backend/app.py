@@ -5,12 +5,17 @@ import oracledb
 app = Flask(__name__)
 CORS(app)
 
+# Indica dónde están las librerías nativas de tu Oracle XE
+oracledb.init_oracle_client(
+    lib_dir=r"C:\oraclexe\app\oracle\product\11.2.0\server\bin"
+)
+
 # Database configuration
 db_config = {
-    "user": "SYS",
-    "password": "MiClave123",
-    "dsn": "localhost:1521/ORCLCDB",
-    "privilege": oracledb.SYSDBA,
+    "user": "BD81",
+    "password": "BD81",
+    "dsn": "localhost:1521/XEXDB",
+    # "privilege": oracledb.SYSDBA,
 }
 
 
@@ -23,6 +28,7 @@ def get_usuarios():
     connection = None
     try:
         connection = get_db_connection()
+        print(connection)
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM Usuario")
         columns = [col[0] for col in cursor.description]
@@ -122,11 +128,11 @@ def setup_database():
         cursor = connection.cursor()
 
         # Execute migrations.sql
-        with open("db/migrations.sql", "r") as f:
-            migrations = f.read()
-            for statement in migrations.split(";"):
-                if statement.strip():
-                    cursor.execute(statement)
+        # with open("db/migrations.sql", "r") as f:
+        #     migrations = f.read()
+        #     for statement in migrations.split(";"):
+        #         if statement.strip():
+        #             cursor.execute(statement)
 
         # Execute dataTest.sql
         with open("db/dataTest.sql", "r") as f:
