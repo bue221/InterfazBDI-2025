@@ -33,7 +33,7 @@ def get_locations():
     try:
         response = requests.get(f"{API_URL}/ubicaciones")
         if response.status_code == 200:
-            print(response.json())
+            print("Locations data:", response.json())  # Debug print
             return response.json()
         else:
             st.error(f"Error al obtener ubicaciones: {response.text}")
@@ -94,11 +94,25 @@ with tab2:
 
     # Obtener ubicaciones
     locations = get_locations()
-    location_dict = (
-        {f"{loc[1]} ({loc[0]})": loc[0] for loc in locations}
-        if locations
-        else {}  # noqa: E501
-    )
+
+    # Crear diccionario de ubicaciones de forma más robusta
+    location_dict = {}
+    if locations:
+        try:
+            for loc in locations:
+                if isinstance(loc, (list, tuple)) and len(loc) >= 2:
+                    location_dict[f"{loc[1]} ({loc[0]})"] = loc[0]
+                elif (
+                    isinstance(loc, dict)
+                    and "codUbica" in loc
+                    and "nombre" in loc  # noqa: E501
+                ):  # noqa: E501
+                    location_dict[f"{loc['nombre']} ({loc['codUbica']})"] = loc[
+                        "codUbica"
+                    ]  # noqa: E501
+        except Exception as e:
+            st.error(f"Error al procesar ubicaciones: {str(e)}")
+            location_dict = {}
 
     with st.form("create_user_form"):
         col1, col2 = st.columns(2)
